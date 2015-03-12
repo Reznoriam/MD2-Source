@@ -210,10 +210,13 @@ namespace MD2
                 IEnumerable<Hediff_InjuryLocal> treatableInjuries = this.healthTracker.hediffSet.GetInjuriesLocalTreatable();
                 foreach (var current in treatableInjuries)
                 {
-                    current.treatedWithMedicine = true;
-                    current.treatmentQuality = 1f;
-                    current.DirectHeal(100);
-                    break;
+                    if (!current.IsTreatedAndHealing)
+                    {
+                        current.treatedWithMedicine = true;
+                        current.treatmentQuality = 1f;
+                        current.DirectHeal(100);
+                        break;
+                    }
                 }
             }
         }

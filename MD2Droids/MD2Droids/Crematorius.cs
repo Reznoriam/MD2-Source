@@ -21,11 +21,18 @@ namespace MD2
                 GenTemperature.PushHeat(this.Position, 5f);
             }
         }
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_Values.LookValue(ref this.stripBodies, "stripBodies",true);
+        }
+
         public override IEnumerable<Gizmo> GetGizmos()
         {
             if (base.GetGizmos() != null)
             {
-                foreach (Command c in base.GetGizmos())
+                foreach (Gizmo c in base.GetGizmos())
                 {
                     yield return c;
                 }

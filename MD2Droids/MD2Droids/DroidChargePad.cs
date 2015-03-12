@@ -21,5 +21,11 @@ namespace MD2
             CompPowerTrader power = this.GetComp<CompPowerTrader>();
             return power != null && power.PowerOn && Charger != null && Charger.CanUse(p);
         }
+        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+        {
+            base.Destroy(mode);
+            if (Charger != null)
+                Charger.Destroy();
+        }
     }
 }

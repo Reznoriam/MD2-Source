@@ -23,6 +23,12 @@ namespace MD2
             }
         }
 
+        public void Destroy()
+        {
+            if (pawn != null)
+                pawn.jobs.EndCurrentJob(Verse.AI.JobCondition.Incompletable);
+        }
+
         public override void CompTick()
         {
             base.CompTick();

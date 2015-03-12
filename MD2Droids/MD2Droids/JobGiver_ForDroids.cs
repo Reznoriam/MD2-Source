@@ -38,7 +38,7 @@ namespace MD2
         {
             return (DroidKindDef)pawn.kindDef;
         }
-
+        
         protected override Job TryGiveTerminalJob(Pawn pawn)
         {
             if (!(pawn is Droid)) return null;
@@ -47,14 +47,16 @@ namespace MD2
             if(Find.PlaySettings.useWorkPriorities)
             { 
                 list = droidKindDef(pawn).allowedWorkTypeDefs.Where((WorkTypeDef def)=>pawn.workSettings.WorkIsActive(def)).ToList();
-                list = list.OrderBy(a => pawn.workSettings.GetPriority(a)).ThenByDescending(b => b.naturalPriority).ToList();
+                list = list.OrderBy(c=>!c.emergency).ThenBy(a => pawn.workSettings.GetPriority(a)).ThenByDescending(b => b.naturalPriority).ToList();
+                //foreach (var c in list)
+                //    Log.Message(c.defName);
             }
             else
             {
-                list = (
-                    from t in droidKindDef(pawn).allowedWorkTypeDefs.Where((WorkTypeDef def)=>pawn.workSettings.WorkIsActive(def))
-                    orderby t.naturalPriority descending
-                    select t).ToList();
+                list = droidKindDef(pawn).allowedWorkTypeDefs.Where((WorkTypeDef def) => pawn.workSettings.WorkIsActive(def)).ToList();
+                list=list.OrderBy(c=>!c.emergency).ThenByDescending(b=>b.naturalPriority).ToList();
+                //foreach (var c in list)
+                //    Log.Message(c.defName);
             }
             foreach (WorkTypeDef current in list)
             {
