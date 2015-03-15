@@ -60,8 +60,6 @@ namespace MD2
             }
             foreach (WorkTypeDef current in list)
             {
-                if (current.emergency == this.onlyEmergencyWork || current.mixedEmergency)
-                {
                     int num = -999;
                     TargetInfo targetInfo = TargetInfo.Invalid;
                     WorkGiver workGiver = null;
@@ -74,13 +72,6 @@ namespace MD2
                             {
                                 break;
                             }
-                            bool flag = current.emergency;
-                            if (giver.def.forceNoEmergency)
-                            {
-                                flag = false;
-                            }
-                            if (flag == this.onlyEmergencyWork)
-                            {
                                 if (giver.MissingRequiredActivity(pawn) == null && !giver.ShouldSkip(pawn))
                                 {
                                     try
@@ -127,8 +118,8 @@ namespace MD2
                                     finally
                                     {
                                     }
-                                }
-                            }
+                                
+                            
                         }
                     }
                     if (targetInfo.Valid)
