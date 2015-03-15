@@ -14,7 +14,13 @@ namespace MD2
             get
             {
                 ThingDef def = ThingDef.Named("MD2Coal");
-                return Find.ThingGrid.ThingAt(this.Position, def);
+                ThingDef def2 = ThingDef.Named("MD2Charcoal");
+                Thing thing;
+                thing= Find.ThingGrid.ThingAt(this.Position, def);
+                if (thing != null)
+                    return thing;
+                else thing = Find.ThingGrid.ThingAt(this.Position, def2);
+                return thing;
             }
         }
 

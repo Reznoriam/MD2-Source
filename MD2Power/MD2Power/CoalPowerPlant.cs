@@ -17,6 +17,7 @@ namespace MD2
         private bool isActive = true, reachedMax = false, takingResources = true;
         private static readonly float fuelConsumptionPerTick = (1f / 300f);
         private CompPowerTrader power;
+        private CompGlower glower;
 
         public override void ExposeData()
         {
@@ -28,6 +29,7 @@ namespace MD2
         {
             base.SpawnSetup();
             power = base.GetComp<CompPowerTrader>();
+            glower = base.GetComp<CompGlower>();
             powerOutput = power.powerOutput;
         }
 
@@ -109,6 +111,10 @@ namespace MD2
                 {
                     UseFuel();
                     power.powerOutput = powerOutput;
+                    if(glower!=null)
+                    {
+                        glower.Lit = true;
+                    }
                     if (Find.TickManager.TicksGame % 200 == 0)
                     {
                         GenTemperature.PushHeat(this, 2f);
@@ -117,6 +123,10 @@ namespace MD2
                 else
                 {
                     power.powerOutput = 0;
+                    if(glower!=null)
+                    {
+                        glower.Lit = false;
+                    }
                 }
             }
         }
@@ -177,27 +187,22 @@ namespace MD2
             get
             {
                 ThingDef def = ThingDef.Named("MD2CoalFeeder");
-                ThingDef coaldef = ThingDef.Named("MD2Coal");
+                List<CoalFeeder> feeders = new List<CoalFeeder>();
                 foreach (IntVec3 current in GenAdj.CellsAdjacentCardinal(this))
                 {
-                    Thing coal = null;
-                    Thing feeder = null;
-                    foreach (Thing current2 in Find.ThingGrid.ThingsAt(current))
+                    foreach(Thing thing in Find.ThingGrid.ThingsAt(current))
                     {
-                        if (current2.def == coaldef)
-                        {
-                            coal = current2;
-                        }
-                        if (current2.def == def)
-                        {
-                            feeder = current2;
-                        }
-                    }
-                    if (coal != null && feeder != null)
-                    {
-                        return (CoalFeeder)feeder;
+                        if (thing.def == def)
+                            feeders.Add((CoalFeeder)thing);
                     }
                 }
+                CoalFeeder feeder = null;
+                if(feeders.Count>0)
+                {
+                    feeder = feeders.Where((CoalFeeder cFeeder) => cFeeder.HasFuelItem).First();
+                }
+                if (feeder != null)
+                    return feeder;
                 return null;
             }
         }
