@@ -9,13 +9,13 @@ namespace MD2
 {
     public class ManufacturingPlantDialog : Layer
     {
-        public ManufacturingPlantDialog(string title,string helpMessage)
+        protected AssemblyLine parent;
+        public ManufacturingPlantDialog(string helpMessage, AssemblyLine parent, string title)
+            : this(600, 700, helpMessage, parent, title)
         {
-            Setup(helpMessage);
-            this.title = title;
         }
 
-        public ManufacturingPlantDialog(float width, float height, string helpMessage, string title = "")
+        public ManufacturingPlantDialog(float width, float height, string helpMessage, AssemblyLine parent, string title = "")
         {
             base.SetCentered(width, height);
             this.category = LayerCategory.GameDialog;
@@ -26,6 +26,7 @@ namespace MD2
             this.doCloseX = true;
             this.message = helpMessage;
             this.title = title;
+            this.parent = parent;
         }
 
         private void Setup(string helpMessage)
@@ -45,7 +46,7 @@ namespace MD2
         protected float currentY = 0f;
         protected override void FillWindow(Rect inRect)
         {
-            if(!title.NullOrEmpty())
+            if (!title.NullOrEmpty())
             {
                 Text.Anchor = TextAnchor.MiddleCenter;
                 Text.Font = GameFont.Medium;

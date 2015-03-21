@@ -9,15 +9,20 @@ namespace MD2
 {
     public class Dialog_UpgradeManager : ManufacturingPlantDialog
     {
-        public Dialog_UpgradeManager(string title)
-            : base(title, "UpgradeManagerHelp".Translate())
+        Vector2 scrollPosition = default(Vector2);
+        public Dialog_UpgradeManager(AssemblyLine parent, string title)
+            : base("UpgradeManagerHelp".Translate(), parent, title)
         {
+            this.doCloseButton = true;
         }
 
         protected override void FillWindow(Rect inRect)
         {
             base.FillWindow(inRect);
 
+            Rect rect = new Rect(0, base.currentY, inRect.width, (inRect.height - base.currentY) / 2);
+            base.currentY += rect.yMax;
+            parent.UpgradeManager.OnGUI(rect, scrollPosition);
 
             base.ResetVariables();
         }

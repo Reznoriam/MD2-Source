@@ -8,10 +8,12 @@ namespace MD2
 {
     public class AssemblyLineUpgradeDef : Def
     {
-        public float speedMult;
-        public float efficiencyMult;
-        public string Name;
+        public UpgradeTarget PropertyToAffect;
+        public float PercentageDecrease;
         public string Description;
-        public Action specialAction;
+        public List<ListItem> RequiredMaterials;
+        public List<AssemblyLineUpgradeDef> Prerequisites;
+        public bool alwaysDisplay = false;
+        public int workTicksAmount = 600;
     }
 }

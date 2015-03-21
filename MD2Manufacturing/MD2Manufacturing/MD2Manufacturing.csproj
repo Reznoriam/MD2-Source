@@ -49,11 +49,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyLine.cs" />
+    <Compile Include="AssemblyLineProperty.cs" />
     <Compile Include="AssemblyLineUpgrade.cs" />
     <Compile Include="AssemblyLineUpgradeDef.cs" />
     <Compile Include="AssemblyLineUpgrades.cs" />
     <Compile Include="BillOfMaterials.cs" />
     <Compile Include="Dialog_UpgradeManager.cs" />
+    <Compile Include="ListExtension.cs" />
     <Compile Include="ManufacturingControlConsole.cs" />
     <Compile Include="ManufacturingPlantDialog.cs" />
     <Compile Include="ManufacturingPlantManager.cs" />
@@ -71,6 +73,8 @@
     <Compile Include="RecipeListGenerator.cs" />
     <Compile Include="ShoppingList.cs" />
     <Compile Include="Storage.cs" />
+    <Compile Include="UpgradeManager.cs" />
+    <Compile Include="UpgradeTarget.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

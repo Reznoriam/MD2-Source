@@ -3,16 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 using Verse;
 
 namespace MD2
 {
     public class ManufacturingControlConsole : Building
     {
-
+        public static readonly Texture2D Manufacturing_Icon = ContentFinder<Texture2D>.Get("UI/Commands/Manufacturing_Icon");
         public override void SpawnSetup()
         {
             base.SpawnSetup();
+            if(!Find.Map.components.Any((MapComponent c)=>c is MPmanager))
+                Find.Map.components.Add(new MPmanager());
         }
 
         public override void Tick()
@@ -56,6 +59,7 @@ namespace MD2
                 };
             com.defaultDesc = "Opens the manufacturing manager user interface";
             com.defaultLabel = "Open manufacturing manager";
+            com.icon = Manufacturing_Icon;
             com.disabled = false;
             com.groupKey = 123456789;
             yield return com;

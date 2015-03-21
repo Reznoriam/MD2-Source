@@ -9,10 +9,10 @@ namespace MD2
 {
     public class AssemblyLine : Saveable
     {
-        private float speed = 1f;
-        private float efficiency = 1f;
-        public static SettingsDef Settings = DefDatabase<SettingsDef>.GetNamed("MD2AssemblyLineSettings");
-        private List<AssemblyLineUpgradeDef> installedUpgrades = new List<AssemblyLineUpgradeDef>();
+        public AssemblyLineProperty Speed;
+        public AssemblyLineProperty Efficiency;
+        private UpgradeManager upgradeManager;
+        public static readonly SettingsDef Settings = DefDatabase<SettingsDef>.GetNamed("MD2AssemblyLineSettings");
         private OrderStack orderStack;
         public string label;
 
@@ -29,33 +29,32 @@ namespace MD2
             a.orderStack = new OrderStack(a);
             a.billOfMaterials = new BillOfMaterials(a);
             a.underConstruction = underConstruction;
+            a.upgradeManager = new UpgradeManager(a);
+            a.Speed = new AssemblyLineProperty(1f);
+            a.Efficiency = new AssemblyLineProperty(1f);
             return a;
         }
 
-        public float Speed
+        public AssemblyLineProperty GetProperty(UpgradeTarget target)
         {
-            get
+            switch (target)
             {
-                return speed;
+                case UpgradeTarget.Efficiency:
+                    return Efficiency;
+                case UpgradeTarget.Speed:
+                    return Speed;
+                default:
+                    {
+                        Log.Error("Error getting property in assemblyline. Invalid target");
+                        return null;
+                    }
             }
         }
 
-        public float Efficiency
+        public void AddUpgrade(AssemblyLineUpgrade upgrade)
         {
-            get
-            {
-                return efficiency;
-            }
-        }
-
-        public bool TryAddUpgrade(AssemblyLineUpgradeDef upgrade)
-        {
-            if (!(this.installedUpgrades.Contains(upgrade)))
-            {
-                this.installedUpgrades.Add(upgrade);
-                return true;
-            }
-            return false;
+            AssemblyLineProperty property = GetProperty(upgrade.Def.PropertyToAffect);
+            property -= upgrade.Def.PercentageDecrease;
         }
 
         public int PowerUsage
@@ -108,6 +107,8 @@ namespace MD2
             }
             else
             {
+                UpgradeManager.Tick();
+
                 if (CurrentOrder != null)
                 {
                     if (CurrentOrder.DesiresToWork)
@@ -141,6 +142,14 @@ namespace MD2
                 return true;
             }
             return false;
+        }
+
+        public UpgradeManager UpgradeManager
+        {
+            get
+            {
+                return this.upgradeManager;
+            }
         }
 
         public int ConstructionTicks
@@ -368,35 +377,20 @@ namespace MD2
         public virtual void Setup()
         {
             //TODO
-
+            UpgradeManager.SpawnSetup();
         }
 
         public void ExposeData()
         {
-            Scribe_Values.LookValue<float>(ref this.speed, "lineSpeed");
-            Scribe_Values.LookValue<float>(ref this.efficiency, "lineEfficiency");
+            Scribe_Deep.LookDeep(ref this.Speed, "lineSpeed");
+            Scribe_Deep.LookDeep(ref this.Efficiency, "lineEfficiency");
             Scribe_Deep.LookDeep<OrderStack>(ref this.orderStack, "orderStack", this);
+            Scribe_Deep.LookDeep(ref this.upgradeManager, "upgradeManager", this);
             Scribe_Values.LookValue<string>(ref this.label, "lineLabel");
             Scribe_Values.LookValue(ref this.constructionTicks, "constructionTicks");
             Scribe_Values.LookValue(ref this.underConstruction, "underConstruction");
             Scribe_Values.LookValue(ref this.constructionPaused, "constructionPaused");
             Scribe_Deep.LookDeep(ref this.billOfMaterials, "billOfMaterials", this);
-        }
-
-        public IEnumerable<AssemblyLineUpgradeDef> AvailableUpgrades
-        {
-            get
-            {
-                List<AssemblyLineUpgradeDef> list = DefDatabase<AssemblyLineUpgradeDef>.AllDefs.ToList();
-                foreach (AssemblyLineUpgradeDef def in list)
-                {
-                    if (this.installedUpgrades.Contains(def))
-                    {
-                        list.Remove(def);
-                    }
-                }
-                return list.AsEnumerable();
-            }
         }
     }
 }

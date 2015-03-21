@@ -49,10 +49,12 @@
     <Compile Include="CorpseFinderUtility.cs" />
     <Compile Include="Designator_CollectSand.cs" />
     <Compile Include="DSUDef.cs" />
+    <Compile Include="Itab_ModInit.cs" />
     <Compile Include="JobDriver_CollectSand.cs" />
     <Compile Include="Keys.cs" />
     <Compile Include="ListItem.cs" />
     <Compile Include="MD2Defs.cs" />
+    <Compile Include="ModController.cs" />
     <Compile Include="MoveDir.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResearchRecipeDef.cs" />

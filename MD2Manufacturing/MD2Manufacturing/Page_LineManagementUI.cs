@@ -78,7 +78,7 @@ namespace MD2
             {
                 Text.Font = GameFont.Medium;
                 Text.Anchor = TextAnchor.MiddleCenter;
-                Widgets.Label(orderStackRect, "No orders");
+                Widgets.Label(orderStackRect, "NoOrders".Translate());
                 Text.Font = GameFont.Small;
                 Text.Anchor = TextAnchor.UpperLeft;
             }
@@ -145,7 +145,7 @@ namespace MD2
                 Rect anotherButtonRect = new Rect(0f, innerOptions.height - CloseButSize.y, buttonXSize, CloseButSize.y);
                 if (Widgets.TextButton(anotherButtonRect, "Upgrades"))
                 {
-                    Find.LayerStack.Add(new Dialog_UpgradeManager("Upgrades"));
+                    Find.LayerStack.Add(new Dialog_UpgradeManager(this.line, "Upgrades"));
                 }
 
             }
