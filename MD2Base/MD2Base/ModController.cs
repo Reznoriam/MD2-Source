@@ -21,10 +21,17 @@ namespace MD2
 
         private void AddDesignators()
         {
-            var def = DefDatabase<DesignationCategoryDef>.GetNamed("Orders");
-            if(def.resolvedDesignators!=null)
+            foreach(var designator in DefDatabase<DesignatorDef>.AllDefs)
             {
-                def.resolvedDesignators.Add(new Designator_CollectSand());
+                Designator des = (Designator)Activator.CreateInstance(designator.designatorClass);
+                if(des!=null)
+                {
+                    var def = DefDatabase<DesignationCategoryDef>.GetNamed(designator.designationCategory);
+                    if(def!=null && def.resolvedDesignators!=null)
+                    {
+                        def.resolvedDesignators.Add(des);
+                    }
+                }
             }
         }
     }

@@ -10,35 +10,19 @@ namespace MD2
     public class ManufacturingPlantDialog : Layer
     {
         protected AssemblyLine parent;
-        public ManufacturingPlantDialog(string helpMessage, AssemblyLine parent, string title)
-            : this(600, 700, helpMessage, parent, title)
-        {
-        }
 
-        public ManufacturingPlantDialog(float width, float height, string helpMessage, AssemblyLine parent, string title = "")
+        public ManufacturingPlantDialog(AssemblyLine parent, string title = "", string helpMessage="", float width=600, float height=700)
         {
             base.SetCentered(width, height);
             this.category = LayerCategory.GameDialog;
             this.absorbAllInput = true;
-            this.forcePause = true;
+            this.forcePause = false;
             this.clearNonEditDialogs = false;
             this.closeOnEscapeKey = true;
             this.doCloseX = true;
             this.message = helpMessage;
             this.title = title;
             this.parent = parent;
-        }
-
-        private void Setup(string helpMessage)
-        {
-            base.SetCentered(600f, 700f);
-            this.category = LayerCategory.GameDialog;
-            this.absorbAllInput = true;
-            this.forcePause = true;
-            this.clearNonEditDialogs = false;
-            this.closeOnEscapeKey = true;
-            this.doCloseX = true;
-            this.message = helpMessage;
         }
 
         protected string title = "";
@@ -54,6 +38,7 @@ namespace MD2
                 Widgets.Label(labelRect, title);
                 currentY += 45f;
                 Widgets.DrawLineHorizontal(0f, currentY, inRect.width);
+                currentY += 10f;
                 Text.Anchor = TextAnchor.UpperLeft;
                 Text.Font = GameFont.Small;
             }
@@ -62,8 +47,9 @@ namespace MD2
                 Rect helpRect = new Rect(0, 0, 20, 20);
                 if (Widgets.TextButton(helpRect, "?"))
                 {
-                    Find.LayerStack.Add(new Dialog_Message(message, "Help"));
+                    Find.LayerStack.Add(new Dialog_Message(message, "Help".Translate()));
                 }
+                TooltipHandler.TipRegion(helpRect, "DialogHelp".Translate());
             }
         }
         protected virtual void ResetVariables()

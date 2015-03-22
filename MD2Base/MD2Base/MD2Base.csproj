@@ -47,9 +47,12 @@
   <ItemGroup>
     <Compile Include="Colours.cs" />
     <Compile Include="CorpseFinderUtility.cs" />
+    <Compile Include="DesignatorDef.cs" />
+    <Compile Include="Designator_CollectClay.cs" />
     <Compile Include="Designator_CollectSand.cs" />
     <Compile Include="DSUDef.cs" />
     <Compile Include="Itab_ModInit.cs" />
+    <Compile Include="JobDriver_CollectClay.cs" />
     <Compile Include="JobDriver_CollectSand.cs" />
     <Compile Include="Keys.cs" />
     <Compile Include="ListItem.cs" />
@@ -64,6 +67,7 @@
     <Compile Include="ThingExtension.cs" />
     <Compile Include="TicksToTime.cs" />
     <Compile Include="Toils_MD2General.cs" />
+    <Compile Include="WorkGiver_CollectClay.cs" />
     <Compile Include="WorkGiver_CollectSand.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

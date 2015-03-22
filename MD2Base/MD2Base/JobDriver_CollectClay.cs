@@ -7,15 +7,13 @@ using Verse.AI;
 
 namespace MD2
 {
-    public class JobDriver_CollectSand : JobDriver
+    public class JobDriver_CollectClay: JobDriver
     {
         private const TargetIndex CellInd = TargetIndex.A;
 
-        public JobDriver_CollectSand(Pawn pawn):base(pawn)
+        public JobDriver_CollectClay(Pawn pawn) : base(pawn)
         {
-
         }
-
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
@@ -25,11 +23,11 @@ namespace MD2
 
             yield return Toils_Goto.GotoCell(CellInd, PathMode.Touch);
 
-            yield return Toils_General.Wait(500);
+            yield return Toils_General.Wait(400);
 
-            yield return Toils_MD2General.MakeAndSpawnThing(ThingDef.Named("MD2SandPile"), 100);
+            yield return Toils_MD2General.MakeAndSpawnThingRandomRange(ThingDef.Named("MD2SoftClay"), 10, 20);
 
-            yield return Toils_MD2General.RemoveDesignationAtPosition(GetActor().jobs.curJob.GetTarget(CellInd).Cell, DefDatabase<DesignationDef>.GetNamed("MD2CollectSand"));
+            yield return Toils_MD2General.RemoveDesignationAtPosition(GetActor().jobs.curJob.GetTarget(CellInd).Cell, DefDatabase<DesignationDef>.GetNamed("MD2CollectClay"));
         }
     }
 }

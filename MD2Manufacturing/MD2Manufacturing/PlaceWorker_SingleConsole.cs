@@ -10,12 +10,14 @@ namespace MD2
     {
         public override AcceptanceReport AllowsPlacing(EntityDef checkingDef, IntVec3 loc, IntRot rot)
         {
-            IEnumerable<ManufacturingControlConsole> console = Find.ListerBuildings.AllBuildingsColonistOfClass<ManufacturingControlConsole>();
-            if(console.Count()==0)
+            ThingDef def = checkingDef as ThingDef;
+            int num = Find.ListerBuildings.allBuildingsColonist.Where((Building b)=>b.def==def).Count();
+            num += Find.ListerThings.ThingsOfDef(def.blueprintDef).Count;
+            if(num==0)
             {
                 return AcceptanceReport.WasAccepted;
             }
-            return "Only one of this building may be built at any one time";
+            return "MaximumOneReportString".Translate();
         }
     }
 }

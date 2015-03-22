@@ -45,9 +45,9 @@ namespace MD2
             {
                 foreach (AssemblyLine line in assemblyLines)
                 {
-                    line.Setup();
-                    needSetup = false;
+                    line.SpawnSetup();
                 }
+                needSetup = false;
             }
             base.MapComponentTick();
 
@@ -73,28 +73,28 @@ namespace MD2
             this.assemblyLines.Remove(line);
         }
 
-        public void AddNewAssemblyLine()
+        public void AddNewAssemblyLine(bool instaBuild)
         {
             //Log.Error("Did this!");
             if (CanAddAssemblyLine)
-                this.assemblyLines.Add(AssemblyLine.NewAssemblyLine());
+                this.assemblyLines.Add(AssemblyLine.NewAssemblyLine(instaBuild));
         }
 
         public int PowerUsage
         {
             get
             {
+                int i = 0;
                 if (manager.assemblyLines.Count <= 0)
                 {
-                    return AssemblyLine.Settings.idlePowerUsage;
+                    i = AssemblyLine.Settings.idlePowerUsage;
                 }
 
-                int i = 0;
                 foreach (var l in MPmanager.manager.AssemblyLines)
                 {
                     i += l.PowerUsage;
                 }
-                return i;
+                return i*-1;
             }
         }
 

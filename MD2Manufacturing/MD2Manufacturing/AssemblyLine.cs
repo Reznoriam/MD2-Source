@@ -22,16 +22,15 @@ namespace MD2
         private bool constructionPaused = false;
         private int constructionTicks = ConstructionTicksRequired;
 
-        public static AssemblyLine NewAssemblyLine(bool underConstruction = true)
+        public static AssemblyLine NewAssemblyLine(bool instaBuild = false)
         {
             AssemblyLine a = new AssemblyLine();
             a.label = string.Format("Assembly Line {0}", MPmanager.manager.AssemblyLines.Count + 1);
             a.orderStack = new OrderStack(a);
-            a.billOfMaterials = new BillOfMaterials(a);
-            a.underConstruction = underConstruction;
+            a.billOfMaterials = new BillOfMaterials(AssemblyLine.Settings.BuildingCost, instaBuild);
             a.upgradeManager = new UpgradeManager(a);
-            a.Speed = new AssemblyLineProperty(1f);
-            a.Efficiency = new AssemblyLineProperty(1f);
+            a.Speed = new AssemblyLineProperty("AssemblyLinePropertySpeed".Translate(), 1f);
+            a.Efficiency = new AssemblyLineProperty("AssemblyLinePropertyEfficiency".Translate(), 1f);
             return a;
         }
 
@@ -54,7 +53,7 @@ namespace MD2
         public void AddUpgrade(AssemblyLineUpgrade upgrade)
         {
             AssemblyLineProperty property = GetProperty(upgrade.Def.PropertyToAffect);
-            property -= upgrade.Def.PercentageDecrease;
+            property.Value += upgrade.Def.PercentageDecrease * -1;
         }
 
         public int PowerUsage
@@ -100,7 +99,7 @@ namespace MD2
                         if (DecreaseTime())
                         {
                             underConstruction = false;
-                            Messages.Message(this.label + " has finished construction and is now ready for use!", MessageSound.Benefit);
+                            Messages.Message("AssemblyLineConstructionFinished".Translate(this.label), MessageSound.Benefit);
                         }
                     }
                 }
@@ -204,26 +203,11 @@ namespace MD2
                     string str;
                     if (billOfMaterials.HasMats)
                     {
-                        str = string.Concat(new object[]{
-                        "Under construction. Time remaining: ",
-                        TicksToTime.GetTime((float)ConstructionTicks)
-                    });
+                        str = "AssemblyLineUnderConstruction".Translate(TicksToTime.GetTime((float)ConstructionTicks));
                     }
                     else
                     {
-                        if (BillOfMaterials.MaterialsRequired.Count > 0)
-                        {
-                            str = "Requires materials:\n";
-                            foreach (ListItem item in AssemblyLine.Settings.BuildingCost)
-                            {
-                                int num2 = billOfMaterials[item.thing];
-                                str += num2 + "/" + item.amount + " " + item.thing.label + "\n";
-                            }
-                        }
-                        else
-                        {
-                            str = "Nothing";
-                        }
+                        str = billOfMaterials.ReportString;
                     }
                     Widgets.Label(lineStatusRect, str);
 
@@ -239,9 +223,9 @@ namespace MD2
                     //Buttons return a bool if they are clicked, so placing them in an if statement will perform an action when they are clicked. (Remember that the FillWindow() function is called every frame, so this code is constantly being executed)
                     string butStr;
                     if (constructionPaused)
-                        butStr = "Resume";
+                        butStr = "MD2Resume".Translate();
                     else
-                        butStr = "Pause";
+                        butStr = "MD2Pause".Translate();
                     if (Widgets.TextButton(butRect, butStr))
                     {
                         if (constructionPaused)
@@ -251,22 +235,16 @@ namespace MD2
                     }
 
                     Rect deleteButRect = new Rect(num + butRect.width + 5f, innerRectCentreY - (interactButtonSize.y / 2), interactButtonSize.y, interactButtonSize.y);
-                    if (Widgets.ImageButton(deleteButRect, ContentFinder<Texture2D>.Get("UI/Buttons/Delete", true)))
+                   if (Widgets.ImageButton(deleteButRect, ContentFinder<Texture2D>.Get("UI/Buttons/Delete", true)))
                     {
                         string s;
                         if (!underConstruction)
                         {
-                            s = string.Concat(new object[]{
-                            "WARNING\n\n",
-                            "This will permanently delete this assembly line! Are you sure you wish to continue?"
-                        });
+                            s = "DeleteAssemblyLine".Translate();
                         }
                         else
                         {
-                            s = string.Concat(new object[]{
-                            "WARNING\n\n",
-                            "This will permanently delete this assembly line! You will be refunded most of the materials it has acquired for construction.\n\n Are you sure you wish to continue?"
-                            });
+                            s = "DeleteAssemblyLineUnderConstruction".Translate();
                         }
                         Find.LayerStack.Add(new Dialog_Confirm(s, delegate
                         {
@@ -274,7 +252,7 @@ namespace MD2
                             ((Page_ManufacturingPlantMainUI)page).assemblyLines = MPmanager.manager.AssemblyLines;
                         }));
                     }
-                    TooltipHandler.TipRegion(deleteButRect, "Delete");
+                    TooltipHandler.TipRegion(deleteButRect, "MD2Delete".Translate());
 
                 }
                 finally
@@ -317,13 +295,13 @@ namespace MD2
                 if (this.CurrentOrder != null && CurrentOrder.DesiresToWork)
                 {
                     if (CurrentOrder.ShoppingList.HasAllMats)
-                        statusString = "Order in production";
+                        statusString = "AssemblyLineStatusInProduction".Translate();
                     else
-                        statusString = "Order requires materials";
+                        statusString = "AssemblyLineStatusRequiresMaterials".Translate();
                 }
                 else
                 {
-                    statusString = "Idle";
+                    statusString = "MD2Idle".Translate();
                 }
                 Widgets.Label(lineInfoRect, statusString);
 
@@ -336,24 +314,21 @@ namespace MD2
                 //we use the centering float here to centre the buttons. Take away half the height of the button from the float to get the position where the button will be perfectly centered.
                 Rect butRect = new Rect(num, innerRectCentreY - (interactButtonSize.y / 2), interactButtonSize.x, interactButtonSize.y);
                 //Buttons return a bool if they are clicked, so placing them in an if statement will perform an action when they are clicked. (Remember that the FillWindow() function is called every frame, so this code is constantly being executed)
-                if (Widgets.TextButton(butRect, "Select"))
+                if (Widgets.TextButton(butRect, "MD2Select".Translate()))
                 {
                     Find.LayerStack.Add(new Page_LineManagementUI(this, page));
                 }
                 Rect deleteButRect = new Rect(num + butRect.width + 5f, innerRectCentreY - (interactButtonSize.y / 2), interactButtonSize.y, interactButtonSize.y);
                 if (Widgets.ImageButton(deleteButRect, ContentFinder<Texture2D>.Get("UI/Buttons/Delete", true)))
                 {
-                    string s = string.Concat(new object[]{
-                            "WARNING\n\n",
-                            "This will permanently delete this assembly line! Are you sure you wish to continue?"
-                        });
+                    string s = "DeleteAssemblyLine".Translate();
                     Find.LayerStack.Add(new Dialog_Confirm(s, delegate
                     {
                         MPmanager.manager.RemoveAssemblyLine(this);
                         ((Page_ManufacturingPlantMainUI)page).assemblyLines = MPmanager.manager.AssemblyLines;
                     }));
                 }
-                TooltipHandler.TipRegion(deleteButRect, "Delete");
+                TooltipHandler.TipRegion(deleteButRect, "MD2Delete".Translate());
                 GUI.EndGroup();
             }
         }
@@ -374,9 +349,8 @@ namespace MD2
             }
         }
 
-        public virtual void Setup()
+        public virtual void SpawnSetup()
         {
-            //TODO
             UpgradeManager.SpawnSetup();
         }
 

@@ -9,20 +9,11 @@ using Verse.Sound;
 
 namespace MD2
 {
-    public class Page_ManufacturingPlantMainUI : ManufacturingPlantPage
+    public class Page_ManufacturingPlantMainUI : Page_ManufacturingPlant
     {
-        protected static readonly Vector2 WinSize = new Vector2(GenUI.MaxWinSize.x, GenUI.MaxWinSize.y);
         public Page_ManufacturingPlantMainUI()
             : base("MainUIHelp".Translate())
         {
-            base.SetCentered(WinSize);
-            this.category = LayerCategory.GameDialog;
-            this.clearNonEditDialogs = true;
-            this.absorbAllInput = true;
-            this.closeOnEscapeKey = true;
-            this.forcePause = true;
-            this.doCloseButton = true;
-            this.doCloseX = true;
         }
         private Vector2 scrollPosition = default(Vector2);
         public List<AssemblyLine> assemblyLines = MPmanager.manager.AssemblyLines;
@@ -37,12 +28,12 @@ namespace MD2
             //First we draw the header
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.UpperCenter;
-            Widgets.Label(new Rect(0f, 0f, 300f, 300f), "Manufacturing Plant");
+            Widgets.Label(new Rect(0f, 0f, 300f, 300f), "ManufacturingPlant".Translate());
             Text.Anchor = TextAnchor.UpperLeft;
 
             //This float is used to set the padding at the bottom of the window.
             float bottomPaddingHeight = 50f;
-            
+
             //The mainRect is the rectangle which contains the listbox
             Rect mainRect = new Rect(0f, bottomPaddingHeight, inRect.width, inRect.height - bottomPaddingHeight - 50f);
 
@@ -76,7 +67,7 @@ namespace MD2
             {
                 Rect rect2 = new Rect(0f, currentY, this.lineEntrySize.x, this.lineEntrySize.y);
                 Text.Font = GameFont.Small;
-                Widgets.Label(rect2, "No assembly lines");
+                Widgets.Label(rect2, "NoAssemblyLines".Translate());
             }
 
                 //If there are entries, then we draw the entry for each element in the list, calling our Draw...() function.
@@ -84,7 +75,7 @@ namespace MD2
             {
                 foreach (AssemblyLine line in assemblyLines)
                 {
-                    line.OnGUI(currentY,this.lineEntrySize,this.interactButtonSize,this);
+                    line.OnGUI(currentY, this.lineEntrySize, this.interactButtonSize, this);
                     //Increment the current y position for the next entry to be drawn
                     currentY += entryHeightWithMargin;
                 }
@@ -96,45 +87,34 @@ namespace MD2
 
             //This draws the button in the bottom right corner of the window. It uses the same size as the Close button
             Rect lineManagerButRect = new Rect(inRect.width - this.lineManagerButtonSize.x, inRect.height - this.lineManagerButtonSize.y, this.lineManagerButtonSize.x, this.lineManagerButtonSize.y);
-            if (Widgets.TextButton(lineManagerButRect, "Construct new Assembly Line"))
+            if (Widgets.TextButton(lineManagerButRect, "ConstructNewAssemblyLine".Translate()))
             {
                 if (MPmanager.manager.CanAddAssemblyLine)
                 {
                     string costString = "";
-                    if (BillOfMaterials.MaterialsRequired.Count == 0)
-                        costString = "Nothing";
+                    if (Game.godMode && AssemblyLine.Settings.instaBuild)
+                        costString = "Nothing".Translate();
                     else
                     {
-                        foreach (var item in BillOfMaterials.MaterialsRequired)
+                        foreach (var item in AssemblyLine.Settings.BuildingCost)
                         {
                             costString += string.Format("{1} {0}\n", item.thing.label, item.amount);
                         }
                     }
-                    string s = string.Concat(new object[]{
-                    "Build new assembly line?\n\n",
-                    "The operation will take: \n",
-                    costString,
-                    "\n\n",
-                    "And will take a total of ",
-                    TicksToTime.GetTime((float)AssemblyLine.ConstructionTicksRequired),
-                    "\n\n",
-                    "Continue?"
-                });
-                    Find.LayerStack.Add(new Dialog_Confirm(s, delegate
+                    Find.LayerStack.Add(new Dialog_Confirm("BuildNewAssemblyLineDialog".Translate(costString, TicksToTime.GetTime((float)AssemblyLine.ConstructionTicksRequired)), delegate
                     {
-                        MPmanager.manager.AddNewAssemblyLine();
+                        MPmanager.manager.AddNewAssemblyLine((Game.godMode && AssemblyLine.Settings.instaBuild));
                     }));
                 }
                 else
                 {
-                    string s = "You have built the maximum number of assembly lines";
-                    Dialog_Message m = new Dialog_Message(s);
+                    Dialog_Message m = new Dialog_Message("MaximumAssemblyLines".Translate());
                     Find.LayerStack.Add(m);
                     SoundDefOf.ClickReject.PlayOneShot(SoundInfo.OnCamera());
                 }
             }
         }
 
-        
+
     }
 }

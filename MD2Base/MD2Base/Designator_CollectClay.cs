@@ -8,13 +8,13 @@ using Verse;
 
 namespace MD2
 {
-    public class Designator_CollectSand : Designator
+    public class Designator_CollectClay : Designator
     {
-        public Designator_CollectSand()
+        public Designator_CollectClay()
         {
-            this.defaultLabel = "DesignatorCollectSandLabel".Translate();
-            this.defaultDesc = "DesignatorCollectSandDesc".Translate();
-            this.icon = ContentFinder<Texture2D>.Get("UI/Designators/SandPile");
+            this.defaultDesc = "DesignatorCollectClayDesc".Translate();
+            this.defaultLabel = "DesignatorCollectClayLabel".Translate();
+            this.icon = ContentFinder<Texture2D>.Get("Items/Resources/SoftClay");
             this.soundDragSustain = SoundDefOf.DesignateDragStandard;
             this.soundDragChanged = SoundDefOf.DesignateDragStandardChanged;
             this.useMouseIcon = true;
@@ -33,19 +33,14 @@ namespace MD2
                 return false;
             if (GridsUtility.Fogged(loc))
                 return false;
-            if (Find.DesignationManager.DesignationAt(loc, DefDatabase<DesignationDef>.GetNamed("MD2CollectSand")) != null)
+            if (Find.DesignationManager.DesignationAt(loc, DefDatabase<DesignationDef>.GetNamed("MD2CollectClay")) != null)
                 return false;
-            if (Find.TerrainGrid.TerrainAt(loc) != TerrainDefOf.Sand)
-                return "DesignatorCollectSandReportString".Translate();
-            return AcceptanceReport.WasAccepted;
-        }
-
-        public override int DraggableDimensions
-        {
-            get
+            if (Find.TerrainGrid.TerrainAt(loc) != DefDatabase<TerrainDef>.GetNamed("Mud") && Find.TerrainGrid.TerrainAt(loc) != DefDatabase<TerrainDef>.GetNamed("WaterShallow"))
             {
-                return 2;
+                //Log.Message(Find.TerrainGrid.TerrainAt(loc).defName);
+                return "DesignatorCollectClayReportString".Translate();
             }
+            return AcceptanceReport.WasAccepted;
         }
 
         public override bool DragDrawMeasurements
@@ -56,9 +51,17 @@ namespace MD2
             }
         }
 
+        public override int DraggableDimensions
+        {
+            get
+            {
+                return 2;
+            }
+        }
+
         public override void DesignateSingle(IntVec3 c)
         {
-            Find.DesignationManager.AddDesignation(new Designation(c, DefDatabase<DesignationDef>.GetNamed("MD2CollectSand")));
+            Find.DesignationManager.AddDesignation(new Designation(c, DefDatabase<DesignationDef>.GetNamed("MD2CollectClay")));
         }
     }
 }

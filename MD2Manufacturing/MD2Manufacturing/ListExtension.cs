@@ -16,5 +16,21 @@ namespace MD2
             }
             return true;
         }
+
+        public static bool DefIsBeingUsed(this List<AssemblyLineUpgrade> baseList, AssemblyLineUpgradeDef def)
+        {
+            if(baseList.Count>0)
+            {
+                foreach(var upgrade in baseList)
+                {
+                    if(upgrade.Def==def)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return false;
+        }
     }
 }

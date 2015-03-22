@@ -8,26 +8,15 @@ using Verse;
 
 namespace MD2
 {
-    public class Page_RecipeManagement : ManufacturingPlantPage
+    public class Page_RecipeManagement : Page_ManufacturingPlant
     {
         private Layer previousPage;
-        protected static Vector2 WinSize = GenUI.MaxWinSize;
-        private AssemblyLine line;
         private List<RecipeDef> recipesList = RecipeListGenerator.AllRecipes().ToList();
         private OrderConfig config;
 
         public Page_RecipeManagement(AssemblyLine line, Page_LineManagementUI previousPage)
-            : base("RecipeManagementHelp".Translate())
+            : base(line, "RecipeManagementHelp".Translate())
         {
-            this.line = line;
-            base.SetCentered(WinSize);
-            this.category = LayerCategory.GameDialog;
-            this.clearNonEditDialogs = true;
-            this.absorbAllInput = true;
-            this.closeOnEscapeKey = true;
-            this.forcePause = true;
-            this.doCloseButton = true;
-            this.doCloseX = true;
             this.previousPage = previousPage;
             if (recipesList != null)
             {
@@ -66,17 +55,12 @@ namespace MD2
         protected static Color MouseHoverColor = new Color(0.2588f, 0.2588f, 0.2588f);
         protected override void FillWindow(Rect inRect)
         {
-            //Rect helpRect = new Rect(0, 0, 30, 30);
-            //if (Widgets.TextButton(helpRect, "?"))
-            //{
-            //    Find.LayerStack.Add(new Dialog_Message("Help message!"));
-            //}
             base.FillWindow(inRect);
             ////
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.UpperCenter;
             float num = inRect.width / 2 - 100f;
-            Widgets.Label(new Rect(num, 0f, 200f, 200f), "Add new order");
+            Widgets.Label(new Rect(num, 0f, 200f, 200f), "AddNewOrder".Translate());
             Text.Font = GameFont.Small;
             Text.Anchor = TextAnchor.MiddleCenter;
             if (Widgets.TextButton(new Rect(0f, inRect.height - buttonSize.y, buttonSize.x, buttonSize.y), "Back"))
@@ -86,12 +70,12 @@ namespace MD2
             if (this.selectedDef == null)
             {
                 GUI.color = InactiveButtonColor;
-                Widgets.TextButton(new Rect(inRect.width - buttonSize.x, inRect.height - buttonSize.y, buttonSize.x, buttonSize.y), "Add order");
+                Widgets.TextButton(new Rect(inRect.width - buttonSize.x, inRect.height - buttonSize.y, buttonSize.x, buttonSize.y), "AddOrder".Translate());
                 GUI.color = Color.white;
             }
             else
             {
-                if (Widgets.TextButton(new Rect(inRect.width - buttonSize.x, inRect.height - buttonSize.y, buttonSize.x, buttonSize.y), "Add order"))
+                if (Widgets.TextButton(new Rect(inRect.width - buttonSize.x, inRect.height - buttonSize.y, buttonSize.x, buttonSize.y), "AddOrder".Translate()))
                 {
                     config.CompleteSetup();
                     this.line.OrderStack.AddNewOrder(new Order(line, config));
@@ -168,29 +152,25 @@ namespace MD2
                     if (description == null)
                     {
                         StringBuilder str = new StringBuilder();
-                        str.Append("Makes ");
+                        str.Append("Makes".Translate());
                         if (selectedDef.products.First().count > 1)
                             str.Append(selectedDef.products.First().count.ToString());
                         else
-                            str.Append("a ");
+                            str.Append("a".Translate());
                         str.Append(selectedDef.products.First().thingDef.label + ".");
                         description = str.ToString();
                     }
                     Widgets.Label(descriptionRect, description);
                     Rect workAmountRect = new Rect(margin, descriptionRect.yMax + margin, workAmountSize.x, workAmountSize.y);
-                    string text = "Time to complete a cycle: " + config.GetTimeForSingleCycle;
+                    string text = "CycleCompleteTime".Translate() + config.GetTimeForSingleCycle;
                     Widgets.Label(workAmountRect, text);
-                    //Text.Font = GameFont.Small;
-                    //Text.Anchor = TextAnchor.UpperLeft;
-                    //GUI.color = Color.white;
-                    //Widgets.Label(new Rect(0f, 0f, infoInnerRect.width, 24f), selectedDef.defName);
                 }
                 else
                 {
                     Text.Font = GameFont.Medium;
                     GUI.color = Color.white;
                     Text.Anchor = TextAnchor.MiddleCenter;
-                    Widgets.Label(new Rect(0f, 0f, infoInnerRect.width, infoInnerRect.height), "No recipe selected");
+                    Widgets.Label(new Rect(0f, 0f, infoInnerRect.width, infoInnerRect.height), "NoRecipeSelected".Translate());
                     Text.Anchor = TextAnchor.UpperLeft;
                     Text.Font = GameFont.Small;
                 }
@@ -250,7 +230,7 @@ namespace MD2
             {
                 Rect rect = new Rect(0f, currentY, this.recipeEntrySize.x, this.recipeEntrySize.y);
                 Text.Font = GameFont.Small;
-                Widgets.Label(rect, "No recipes found :(");
+                Widgets.Label(rect, "NoRecipesFound".Translate());
             }
             else
             {

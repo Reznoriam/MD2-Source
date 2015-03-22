@@ -59,7 +59,7 @@
     <Compile Include="ManufacturingControlConsole.cs" />
     <Compile Include="ManufacturingPlantDialog.cs" />
     <Compile Include="ManufacturingPlantManager.cs" />
-    <Compile Include="ManufacturingPlantPage.cs" />
+    <Compile Include="Page_ManufacturingPlant.cs" />
     <Compile Include="ManufacturingPlantRecipesDef.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="OrderConfig.cs" />

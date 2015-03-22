@@ -9,18 +9,19 @@ namespace MD2
 {
     public class BillOfMaterials : Saveable
     {
-        public BillOfMaterials(AssemblyLine line)
+        public BillOfMaterials(List<ListItem> requiredMaterials, bool instaBuild=false)
         {
-            //Log.Error("Did this");
-            this.line = line;
-            foreach (ListItem item in AssemblyLine.Settings.BuildingCost)
+            this.instaBuild = instaBuild;
+            this.requiredMaterials = requiredMaterials;
+            foreach (ListItem item in requiredMaterials)
             {
                 acquiredMats.Add(item.thing, 0);
             }
         }
 
-        private AssemblyLine line;
+        private bool instaBuild;
         private Dictionary<ThingDef, int> acquiredMats = new Dictionary<ThingDef, int>();
+        private List<ListItem> requiredMaterials = new List<ListItem>();
         private bool hasMats = false;
 
         public virtual void Tick()
@@ -30,21 +31,43 @@ namespace MD2
             CheckIfHaveAllMaterials();
         }
 
-        public static List<ListItem> MaterialsRequired
+        public List<ListItem> MaterialsRequired
         {
             get
             {
-                if (Game.godMode && AssemblyLine.Settings.instaBuild)
+                if (instaBuild)
                 {
                     return new List<ListItem>();
                 }
-                return AssemblyLine.Settings.BuildingCost;
+                return this.requiredMaterials;
+            }
+        }
+
+        public string ReportString
+        {
+            get
+            {
+                string s = "RequiresMaterials".Translate();
+                if (requiredMaterials.Count > 0)
+                {
+                    foreach (var item in requiredMaterials)
+                    {
+                        int amount = 0;
+                        acquiredMats.TryGetValue(item.thing, out amount);
+                        s += amount.ToString() + "/" + item.amount.ToString() + " " + item.thing.LabelCap + "\n";
+                    }
+                    return s;
+                }
+                else
+                {
+                    return "MD2Nothing".Translate();
+                }
             }
         }
 
         private void CheckIfHaveAllMaterials()
         {
-            if (Game.godMode && AssemblyLine.Settings.instaBuild)
+            if (instaBuild)
             {
                 hasMats = true;
             }
@@ -72,11 +95,11 @@ namespace MD2
 
         private void TryTakeNeededItems()
         {
-            if (Game.godMode && AssemblyLine.Settings.instaBuild)
+            if (instaBuild)
             {
                 return;
             }
-            foreach (var item in AssemblyLine.Settings.BuildingCost)
+            foreach (var item in requiredMaterials)
             {
                 IEnumerable<Thing> things = (
                     from t in RimWorld.TradeUtility.AllLaunchableThings
@@ -186,7 +209,9 @@ namespace MD2
         public void ExposeData()
         {
             Scribe_Collections.LookDictionary<ThingDef, int>(ref this.acquiredMats, "acquiredMats", LookMode.DefReference, LookMode.Value);
+            Scribe_Collections.LookList(ref this.requiredMaterials, "requiredMaterials", LookMode.Deep);
             Scribe_Values.LookValue(ref this.hasMats, "hasMats");
+            Scribe_Values.LookValue(ref this.instaBuild, "instaBuild");
         }
     }
 }

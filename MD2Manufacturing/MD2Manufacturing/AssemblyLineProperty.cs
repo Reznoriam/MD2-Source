@@ -9,13 +9,24 @@ namespace MD2
     public class AssemblyLineProperty: Saveable
     {
         private float value;
-        public AssemblyLineProperty(float initialValue)
+        private string label = "";
+
+        public AssemblyLineProperty(string label, float initialValue)
         {
             this.value = initialValue;
+            this.label = label;
         }
-        public AssemblyLineProperty():this(1f)
+        public AssemblyLineProperty(string label):this(label, 1f)
         {
 
+        }
+
+        public string Label
+        {
+            get
+            {
+                return label;
+            }
         }
 
         public static implicit operator float(AssemblyLineProperty p)
@@ -23,20 +34,7 @@ namespace MD2
             return p.Value;
         }
 
-        public static AssemblyLineProperty operator -(AssemblyLineProperty p, float num)
-        {
-            float num2 = p - num;
-            if (num2 <= 0)
-                num2 = 0.01f;
-            return new AssemblyLineProperty(num2);
-        }
-
-        public static AssemblyLineProperty operator +(AssemblyLineProperty p, float num)
-        {
-            return new AssemblyLineProperty(p + num);
-        }
-
-        private float Value
+        public float Value
         {
             get
             {
@@ -52,6 +50,7 @@ namespace MD2
         public void ExposeData()
         {
             Scribe_Values.LookValue(ref this.value, "value", 1f);
+            Scribe_Values.LookValue(ref this.label, "label");
         }
     }
 }

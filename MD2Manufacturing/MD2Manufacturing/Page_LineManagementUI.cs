@@ -7,25 +7,14 @@ using Verse;
 
 namespace MD2
 {
-    public class Page_LineManagementUI : ManufacturingPlantPage
+    public class Page_LineManagementUI : Page_ManufacturingPlant
     {
         public Layer previousPage;
-        private AssemblyLine line;
-        protected static Vector2 WinSize = GenUI.MaxWinSize;
         private List<Order> orders;
 
         public Page_LineManagementUI(AssemblyLine line, Layer previous)
-            : base("LineManagementHelp".Translate())
+            : base(line,"LineManagementHelp".Translate())
         {
-            this.line = line;
-            base.SetCentered(WinSize);
-            this.category = LayerCategory.GameDialog;
-            this.clearNonEditDialogs = true;
-            this.absorbAllInput = true;
-            this.closeOnEscapeKey = true;
-            this.forcePause = true;
-            this.doCloseButton = true;
-            this.doCloseX = true;
             this.previousPage = previous;
             this.selectedOrder = line.CurrentOrder;
             this.orders = line.OrderStack.All.ToList();
@@ -131,21 +120,21 @@ namespace MD2
                 float butY2 = innerOptions.height - (this.CloseButSize.y + (CloseButSize.y / 2));
 
                 //Add recipe button
-                Rect recipeButtonRect = new Rect(0f, 0f, buttonXSize, CloseButSize.y);
-                if (Widgets.TextButton(recipeButtonRect, "Add Order"))
+                Rect recipeButtonRect = new Rect(0f, innerOptions.height / 2 - CloseButSize.y / 2, buttonXSize, CloseButSize.y);
+                if (Widgets.TextButton(recipeButtonRect, "AddOrder".Translate()))
                 {
                     Find.LayerStack.Add(new Page_RecipeManagement(line, this));
                 }
 
                 //Options button
-                Rect optionsButtonRect = new Rect(innerOptions.width - buttonXSize, 0f, buttonXSize, CloseButSize.y);
-                Widgets.TextButton(optionsButtonRect, "Options");
+                //Rect optionsButtonRect = new Rect(innerOptions.width - buttonXSize, 0f, buttonXSize, CloseButSize.y);
+                //Widgets.TextButton(optionsButtonRect, "MD2Options".Translate());
 
-                //Another button
-                Rect anotherButtonRect = new Rect(0f, innerOptions.height - CloseButSize.y, buttonXSize, CloseButSize.y);
-                if (Widgets.TextButton(anotherButtonRect, "Upgrades"))
+                //Upgrades button
+                Rect upgradesButtonRect = new Rect(innerOptions.width-buttonXSize, innerOptions.height /2 - CloseButSize.y/2, buttonXSize, CloseButSize.y);
+                if (Widgets.TextButton(upgradesButtonRect, "Upgrades".Translate()))
                 {
-                    Find.LayerStack.Add(new Dialog_UpgradeManager(this.line, "Upgrades"));
+                    Find.LayerStack.Add(new Dialog_UpgradeManager(this.line));
                 }
 
             }
@@ -168,7 +157,7 @@ namespace MD2
                     Rect selectedLabelRect = new Rect(0f, 0f, innerConfig.width, labelWidth);
                     y += labelWidth + margin;
                     Text.Anchor = TextAnchor.MiddleCenter;
-                    Widgets.Label(selectedLabelRect, "Selected: " + selectedOrder.Recipe.LabelCap);
+                    Widgets.Label(selectedLabelRect, "Selected".Translate() + ": " + selectedOrder.Recipe.LabelCap);
                     Text.Anchor = TextAnchor.UpperLeft;
                     Rect configRect = new Rect(0f, y, innerConfig.width, innerConfig.height - y);
                     this.selectedOrder.Config.OnGUI(configRect);
@@ -183,7 +172,7 @@ namespace MD2
             {
                 Text.Font = GameFont.Medium;
                 Text.Anchor = TextAnchor.MiddleCenter;
-                Widgets.Label(innerConfig, "No current order");
+                Widgets.Label(innerConfig, "NoCurrentOrder".Translate());
                 Text.Font = GameFont.Small;
                 Text.Anchor = TextAnchor.UpperLeft;
             }
@@ -280,20 +269,20 @@ namespace MD2
                 Rect timeRect = new Rect(innerRect.width / 3 + padding, 0f, innerRect.width / 3 - padding * 2, innerRect.height);
                 string s;
                 if (order.ShoppingList.HasAllMats)
-                    s = "Time remaining: " + order.GetTimeRemaining;
+                    s = "TimeRemaining".Translate() +": " + order.GetTimeRemaining;
                 else
-                    s = "Awaiting materials";
+                    s = "AwaitingMaterials".Translate();
                 Widgets.Label(timeRect, s);
 
                 //Do the count label
                 Rect countRect = new Rect((innerRect.width / 3) * 2 + padding, 0f, innerRect.width / 3 - butSize.x - padding * 2, innerRect.height);
                 string count = string.Empty;
                 if (order.Config.RepeatMode == RimWorld.BillRepeatMode.Forever)
-                    count = "Infinite";
+                    count = "MD2Infinite".Translate();
                 if (order.Config.RepeatMode == RimWorld.BillRepeatMode.RepeatCount)
                     count = order.Config.Cycles.ToString() + "x";
                 if (order.Config.RepeatMode == RimWorld.BillRepeatMode.TargetCount)
-                    count = "Until " + order.Config.TargetCount.ToString();
+                    count = "MD2Until".Translate()+" " + order.Config.TargetCount.ToString();
                 Widgets.Label(countRect, count);
 
                 //Do the delete button
@@ -304,7 +293,7 @@ namespace MD2
                     this.orders = line.OrderStack.All.ToList();
                     this.selectedOrder = line.CurrentOrder;
                 }
-                TooltipHandler.TipRegion(deleteButRect, "Delete");
+                TooltipHandler.TipRegion(deleteButRect, "MD2Delete".Translate());
 
                 //Do the suspend button
                 Rect suspendButrect = new Rect(innerRect.width - butSize.x, innerRect.height - butSize.y, butSize.x, butSize.y);
@@ -312,7 +301,7 @@ namespace MD2
                 {
                     order.Config.Suspended = !order.Config.Suspended;
                 }
-                TooltipHandler.TipRegion(suspendButrect, "Suspend");
+                TooltipHandler.TipRegion(suspendButrect, "MD2Suspend".Translate());
 
                 //Do the move up button
                 Rect upButRect = new Rect(innerRectCentreX - butSize.x, 0f, butSize.x, butSize.y);
@@ -330,7 +319,7 @@ namespace MD2
                     GUI.DrawTexture(upButRect, TexButton.ReorderUp);
                     GUI.color = Color.white;
                 }
-                TooltipHandler.TipRegion(upButRect, "Move up");
+                TooltipHandler.TipRegion(upButRect, "MoveUp".Translate());
 
 
                 //Do the move down button
@@ -349,7 +338,7 @@ namespace MD2
                     GUI.DrawTexture(downButRect, TexButton.ReorderDown);
                     GUI.color = Color.white;
                 }
-                TooltipHandler.TipRegion(downButRect, "Move down");
+                TooltipHandler.TipRegion(downButRect, "MoveDown".Translate());
 
 
                 //Do the invisible button which selects the order.This needs to go last
