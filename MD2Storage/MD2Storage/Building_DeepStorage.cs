@@ -1,274 +1,139 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace MD2
 {
     public class Building_DeepStorage : Building_Storage
     {
-        private static readonly Texture2D EjectAllUI = ContentFinder<Texture2D>.Get("UI/Commands/EjectAll");
-        private List<IntVec3> cellsThisContains = new List<IntVec3>();
         private IntVec3 inputSlot, outputSlot;
-        private int maxStorage = 1500, amountOfStoredItems = 0;
-        private ThingDef storedThing;
-        private string storedThingName = "";
+        private int maxStorage = 1000;
+        private ThingDef storedThingDef = null;
 
         public override void SpawnSetup()
         {
             base.SpawnSetup();
-            cellsThisContains = GenAdj.CellsOccupiedBy(this).ToList<IntVec3>();
-            this.maxStorage = ((DSUDef)def).maxStorage;
-            inputSlot = cellsThisContains[0];
-            outputSlot = cellsThisContains[1];
-            if (storedThingName != "")
-            {
-                this.storedThing = DefDatabase<ThingDef>.GetNamed(storedThingName);
-            }
-        }
-
-        public override void ExposeData()
-        {
-            base.ExposeData();
-            Scribe_Values.LookValue<IntVec3>(ref this.inputSlot, "inputSlot");
-            Scribe_Values.LookValue<IntVec3>(ref this.outputSlot, "outputSlot");
-            Scribe_Values.LookValue<String>(ref this.storedThingName, "thingToStore", "");
-            Scribe_Values.LookValue<int>(ref this.maxStorage, "maxStorage");
-            Scribe_Values.LookValue<int>(ref this.amountOfStoredItems, "amountOfStoredItems");
+            maxStorage = ((DSUDef)def).maxStorage;
+            List<IntVec3> cells = GenAdj.CellsOccupiedBy(this).ToList();
+            inputSlot = cells[0];
+            outputSlot = cells[1];
         }
 
         public override void Tick()
         {
             base.Tick();
-            //TODO: make DSU display stored amount in resource counter
-            //int num = Find.ResourceCounter.AllCountedAmounts[storedThing];
-            if (!StorageFull)
+            if (Find.TickManager.TicksGame % 10 == 0)
             {
-                TakeItem();
-            }
-            if (HasItemStored)
-            {
-                DispenseItem();
-            }
-        }
-
-        public void DispenseItem()
-        {
-            if (amountOfStoredItems > 0 && storedThing != null)
-            {
-                List<Thing> list = (
-                    from t in Find.ThingGrid.ThingsAt(outputSlot)
-                    where t.def == storedThing
-                    select t).ToList();
-                foreach (Thing thing in list)
+                CheckOutputSlot();
+                if (!StorageFull)
                 {
-                    if (thing != null && thing.def == storedThing && thing.stackCount < thing.def.stackLimit)
-                    {
-                        DispenseToExistingStack(thing);
-                        return;
-                    }
-                }
-                if (list.Count == 0 && storedThing != null)
-                {
-                    DispenseNewStack();
-                }
-            }
-        }
-        private void DispenseNewStack()
-        {
-            DispenseNewStack(outputSlot);
-        }
-        private void DispenseNewStack(IntVec3 pos)
-        {
-
-            //Make the thing, select either the stack limit or the remaining items in storage, whichever is less. Then spawn the item
-            if (storedThing != null)
-            {
-                int num = Mathf.Min(amountOfStoredItems, storedThing.stackLimit);
-                int stack;
-                ThingDef def = storedThing;
-                int remainder = RemoveSomeFromStorage(num);
-                if (remainder == 0)
-                {
-                    stack = num;
-                }
-                else
-                {
-                    stack = remainder;
-                }
-                Thing thing = ThingMaker.MakeThing(def);
-                thing.stackCount = stack;
-                GenSpawn.Spawn(thing, pos);
-            }
-
-        }
-
-        ///<summary>
-        ///Removes the given number of items from storage. Returns the remainder if the given number was greater than the amount of stored items.
-        ///</summary> 
-        public int RemoveSomeFromStorage(int stack)
-        {
-            int num = Mathf.Min(stack, amountOfStoredItems);
-            amountOfStoredItems -= num;
-            if (amountOfStoredItems == 0)
-            {
-                this.storedThing = null;
-                this.storedThingName = "";
-            }
-            return stack - num;
-        }
-
-        private void DispenseToExistingStack(Thing thing)
-        {
-            if (thing != null && thing.stackCount < thing.def.stackLimit)
-            {
-                int amount = thing.def.stackLimit - thing.stackCount;
-                int remainder = RemoveSomeFromStorage(amount);
-                if (remainder == 0)
-                {
-                    thing.stackCount += amount;
-                }
-                else
-                {
-                    if (remainder <= amount)
-                    {
-                        thing.stackCount += remainder;
-                    }
-                    else
-                    {
-                        Log.Error(String.Format("Incorrect amounts when dispensing to existing stack: amount allowed {0}, amount attempted {1}", amount, remainder));
-                    }
-                }
-                if (thing.stackCount > thing.def.stackLimit)
-                {
-                    thing.stackCount = thing.def.stackLimit;
+                    TryMoveItem();
                 }
             }
         }
 
-        public void TakeItem()
+        private void CheckOutputSlot()
         {
-            IEnumerable<Thing> list = (
-                from t in Find.ThingGrid.ThingsAt(inputSlot)
-                where t.def.EverStoreable
+            if (storedThingDef == null) return;
+            if (StoredThing == null)
+            {
+                storedThingDef = null;
+                return;
+            }
+            List<Thing> things = (
+                from t in Find.ThingGrid.ThingsAt(outputSlot)
+                where t.def == storedThingDef
+                orderby t.stackCount
                 select t).ToList();
-            foreach (Thing thing in list)
+            if (things.Count > 1)
             {
-                if (thing != null && slotGroup.Settings.AllowedToAccept(thing))
+                Thing thing = ThingMaker.MakeThing(storedThingDef, things.First().Stuff);
+                foreach (var current in things)
                 {
-                    if (storedThing == null)
-                    {
-                        AddNewItem(thing);
-                        thing.Destroy();
-                        return;
-                    }
-                    if (storedThing != null && thing.def == storedThing)
-                    {
-                        int amount = StoreItem(thing.stackCount);
-                        if (amount == 0)
-                        {
-                            thing.Destroy();
-                        }
-                        else
-                        {
-                            thing.stackCount -= amount;
-                            if (thing.stackCount <= 0)
-                            {
-                                thing.Destroy();
-                            }
-                        }
-                        return;
-                    }
+                    thing.stackCount += current.stackCount;
+                    current.Destroy(DestroyMode.Vanish);
                 }
+                GenSpawn.Spawn(thing, outputSlot);
             }
         }
-        /// <summary>
-        /// Stores the given number of items. Returns zero if all was stored, else returns the number of items stored.
-        /// </summary>
-        /// <param name="num"></param>
-        /// <returns></returns>
-        public int StoreItem(int num)
+
+        private void TryMoveItem()
         {
-            int num1 = Mathf.Min(num, RemainingStorage);
-            this.amountOfStoredItems += num1;
-            if (num1 == num)
+            if (storedThingDef == null)
             {
-                return 0;
+                Thing thing = StoredThingAtInput;
+                if (thing != null)
+                {
+                    storedThingDef = thing.def;
+                    Thing thing2 = ThingMaker.MakeThing(storedThingDef, thing.Stuff);
+                    thing2.stackCount = thing.stackCount;
+                    thing.Destroy(DestroyMode.Vanish);
+                    GenSpawn.Spawn(thing2, outputSlot);
+                }
+                return;
             }
             else
             {
-                return num1;
-            }
-        }
-
-        private void AddNewItem(Thing thing)
-        {
-            storedThing = thing.def;
-            storedThingName = thing.def.defName;
-            amountOfStoredItems = thing.stackCount;
-        }
-
-        public List<IntVec3> CellsThisContains
-        {
-            get
-            {
-                return this.cellsThisContains;
-            }
-        }
-
-        public bool HasItemStored
-        {
-            get
-            {
-                return this.storedThing != null;
-            }
-        }
-
-        public ThingDef StoredThing
-        {
-            get
-            {
-                return this.storedThing;
-            }
-        }
-
-        public IntVec3 InputSlot
-        {
-            get
-            {
-                if (this.inputSlot != null)
+                //TODO check for remaining storage space and only take the remaining amount
+                Thing thing = StoredThingAtInput;
+                Thing storedThing = StoredThing;
+                if (thing != null)
                 {
-                    return this.inputSlot;
+                    if (storedThing != null)
+                    {
+                        int remaining = ApparentMaxStorage - storedThing.stackCount;
+                        int num = UnityEngine.Mathf.Min(remaining, thing.stackCount);
+                        storedThing.stackCount += num;
+                        thing.stackCount -= num;
+                        if (thing.stackCount <= 0)
+                            thing.Destroy(DestroyMode.Vanish);
+                        return;
+                    }
+                    Thing thing2 = ThingMaker.MakeThing(thing.def, thing.Stuff);
+                    GenSpawn.Spawn(thing2, outputSlot);
+                    thing.Destroy(DestroyMode.Vanish);
+                }
+            }
+        }
+
+        public Thing StoredThingAtInput
+        {
+            get
+            {
+                if (storedThingDef != null)
+                {
+                    List<Thing> things = (
+                        from t in Find.ThingGrid.ThingsAt(inputSlot)
+                        where t.def == storedThingDef
+                        select t).ToList();
+                    return things.Count > 0 ? things.First() : null;
                 }
                 else
                 {
-                    return IntVec3.Invalid;
-                }
-            }
-        }
-        public IntVec3 OutputSlot
-        {
-            get
-            {
-                if (this.outputSlot != null)
-                {
-                    return this.outputSlot;
-                }
-                else
-                {
-                    return IntVec3.Invalid;
+                    List<Thing> things = (
+                        from t in Find.ThingGrid.ThingsAt(inputSlot)
+                        where slotGroup.Settings.AllowedToAccept(t)
+                        select t).ToList();
+                    return things.Count > 0 ? things.First() : null;
                 }
             }
         }
 
-        public int RemainingStorage
+        public Thing StoredThing
         {
             get
             {
-                return maxStorage - amountOfStoredItems;
+                if (storedThingDef == null) return null;
+
+                List<Thing> things = (
+                    from t in Find.ThingGrid.ThingsListAt(outputSlot)
+                    where t.def == storedThingDef
+                    select t).ToList();
+                if (things.Count <= 0) return null;
+                return things.First();
             }
         }
 
@@ -276,101 +141,30 @@ namespace MD2
         {
             get
             {
-                return amountOfStoredItems == maxStorage;
+                if (storedThingDef == null) return false;
+                if (StoredThing == null) return false;
+                if (StoredThing.stackCount >= ApparentMaxStorage) return true;
+                return false;
             }
         }
 
-        public override string GetInspectString()
+        public int ApparentMaxStorage
         {
-            StringBuilder str = new StringBuilder();
-            str.Append(base.GetInspectString());
-            str.AppendLine(String.Format("Maximum Storage: {0}", this.maxStorage.ToString()));
-            if (HasItemStored)
+            get
             {
-                str.AppendLine(String.Format("Stored Item: {0}", storedThing.defName));
-                str.AppendLine(String.Format("Amount: {0}", amountOfStoredItems.ToString()));
-            }
-            else
-            {
-                str.AppendLine("Nothing stored.");
-            }
-            return str.ToString();
-        }
-
-        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
-        {
-            if (storedThing != null)
-            {
-                Log.Message("init");
-                DispenseAllItems(mode);
-            }
-            base.Destroy(mode);
-        }
-
-        public void DispenseAllItems(DestroyMode mode)
-        {
-            if (this.storedThing != null)
-            {
-                if (mode == DestroyMode.Kill)
+                if (storedThingDef == null) return 0;
+                if (storedThingDef.stuffProps != null)
                 {
-                    amountOfStoredItems = Rand.Range(0, amountOfStoredItems);
+                    return (int)(maxStorage / storedThingDef.stuffProps.VolumePerUnit);
                 }
-                int count = 0;
-                while (amountOfStoredItems > 0)
-                {
-                    IntVec3 pos = base.Position + GenRadial.RadialPattern[count];
-                    if (pos == inputSlot)
-                    {
-                        count++;
-                        continue;
-                    }
-                    if (pos.Walkable())
-                    {
-                        List<Thing> list = (
-                            from t in Find.ThingGrid.ThingsAt(pos)
-                            where t.def == storedThing
-                            select t).ToList();
-                        if (list.Count == 0)
-                        {
-                            DispenseNewStack(pos);
-                        }
-                        else
-                        {
-                            foreach (Thing thing in list)
-                            {
-                                DispenseToExistingStack(thing);
-                            }
-                        }
-                    }
-                    count++;
-                }
+                return maxStorage;
             }
-        }
-        public override IEnumerable<Gizmo> GetGizmos()
-        {
-            if (base.GetGizmos() != null)
-            {
-                foreach (var c in base.GetGizmos())
-                {
-                    yield return c;
-                }
-            }
-            var com = new Command_Action
-            {
-                action = () =>
-                    {
-                        this.DispenseAllItems(DestroyMode.Deconstruct);
-                    },
-                defaultDesc = "Click to eject all stored items",
-                defaultLabel = "Eject All",
-                activateSound = SoundDef.Named("Click"),
-                hotKey = Keys.Named("DeepStorageEjectAll"),
-                disabled = false,
-                groupKey = 313740009,
-                icon = EjectAllUI
-            };
-            yield return com;
         }
 
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_Defs.LookDef(ref this.storedThingDef, "storedThingDef");
+        }
     }
 }
