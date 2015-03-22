@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -45,6 +46,11 @@ namespace MD2
                     else
                     {
                         thing = ThingMaker.MakeThing(current.thingDef);
+                    }
+                    CompArt art = thing.TryGetComp<CompArt>();
+                    if(art!=null)
+                    {
+                        art.GenerateTaleRef(ArtGenerationSource.Colony);
                     }
                     int num = UnityEngine.Mathf.Min(count, thing.def.stackLimit);
                     thing.stackCount = num;
