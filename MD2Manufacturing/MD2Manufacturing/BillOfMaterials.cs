@@ -18,6 +18,9 @@ namespace MD2
                 acquiredMats.Add(item.thing, 0);
             }
         }
+        public BillOfMaterials():this(new List<ListItem>())
+        {
+        }
 
         private bool instaBuild;
         private Dictionary<ThingDef, int> acquiredMats = new Dictionary<ThingDef, int>();

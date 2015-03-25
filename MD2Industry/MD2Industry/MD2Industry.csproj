@@ -55,8 +55,6 @@
     <Compile Include="FissureSize.cs" />
     <Compile Include="MinerResourceDef.cs" />
     <Compile Include="PlacementRestrictor_OnFissure.cs" />
-    <Compile Include="PlaceWorker_MaximumFive.cs" />
-    <Compile Include="PlaceWorker_OnMudAndWater.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

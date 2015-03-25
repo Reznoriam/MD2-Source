@@ -14,7 +14,7 @@ namespace MD2
         {
             this.defaultLabel = "DesignatorCollectSandLabel".Translate();
             this.defaultDesc = "DesignatorCollectSandDesc".Translate();
-            this.icon = ContentFinder<Texture2D>.Get("UI/Designators/SandPile");
+            this.icon = ContentFinder<Texture2D>.Get("UI/Designations/SandPile");
             this.soundDragSustain = SoundDefOf.DesignateDragStandard;
             this.soundDragChanged = SoundDefOf.DesignateDragStandardChanged;
             this.useMouseIcon = true;

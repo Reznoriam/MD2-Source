@@ -20,6 +20,10 @@ namespace MD2
         {
 
         }
+        public AssemblyLineProperty():this("Unnamed",1f)
+        {
+
+        }
 
         public string Label
         {

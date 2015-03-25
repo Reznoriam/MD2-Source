@@ -364,7 +364,7 @@ namespace MD2
             Scribe_Values.LookValue(ref this.constructionTicks, "constructionTicks");
             Scribe_Values.LookValue(ref this.underConstruction, "underConstruction");
             Scribe_Values.LookValue(ref this.constructionPaused, "constructionPaused");
-            Scribe_Deep.LookDeep(ref this.billOfMaterials, "billOfMaterials", this);
+            Scribe_Deep.LookDeep(ref this.billOfMaterials, "billOfMaterials");
         }
     }
 }

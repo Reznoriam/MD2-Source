@@ -22,7 +22,7 @@ namespace MD2
             base.FillWindow(inRect);
 
             Rect infoPaneRect = new Rect(0, currentY, inRect.width, 60f);
-            Rect infoLabelRect = new Rect(15f, currentY, infoPaneRect.width-15f, infoPaneRect.height);
+            Rect infoLabelRect = infoPaneRect.ContractedBy(4f);
 
             base.currentY += infoPaneRect.yMax + 10f;
             Widgets.DrawMenuSection(infoPaneRect);
@@ -39,7 +39,7 @@ namespace MD2
             });
 
             Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(infoPaneRect, info);
+            Widgets.Label(infoLabelRect, info);
             Text.Anchor = TextAnchor.UpperLeft;
 
             Rect rect = new Rect(0, base.currentY, inRect.width, inRect.height - base.currentY-(CloseButSize.y+padding));

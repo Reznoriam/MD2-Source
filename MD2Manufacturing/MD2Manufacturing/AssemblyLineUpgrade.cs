@@ -9,13 +9,18 @@ namespace MD2
     public class AssemblyLineUpgrade : Saveable
     {
         private AssemblyLineUpgradeDef def;
-        private BillOfMaterials billOfMaterials;
+        private BillOfMaterials billOfMaterials=new BillOfMaterials();
         private int workRemaining = 0;
 
         public AssemblyLineUpgrade(AssemblyLineUpgradeDef def)
         {
             this.def = def;
             this.billOfMaterials = new BillOfMaterials(def.RequiredMaterials);
+        }
+
+        public AssemblyLineUpgrade()
+        {
+
         }
 
         public bool Tick()

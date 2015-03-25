@@ -71,7 +71,7 @@ namespace MD2
         public void ExposeData()
         {
             Scribe_Collections.LookList(ref this.CompletedUpgrades, "completedUpgrades", LookMode.DefReference);
-            Scribe_Collections.LookList(ref this.UpgradesInProgress, "upgradesinProgress", LookMode.Deep);
+            Scribe_Collections.LookList(ref this.UpgradesInProgress, "UpgradesInProgress", LookMode.Deep);
         }
 
         public void OnGUI(Rect inRect)
@@ -159,7 +159,7 @@ namespace MD2
 
                 Text.Anchor = TextAnchor.MiddleLeft;
                 float width = Text.CalcSize(upgrade.Def.LabelCap).x;
-                Rect labelRect = new Rect(10f, 0f, width, innerRect.height);
+                Rect labelRect = new Rect(0f, 0f, width, innerRect.height);
                 Widgets.Label(labelRect, upgrade.Def.LabelCap);
 
                 string s;
@@ -172,7 +172,8 @@ namespace MD2
                 {
                     s = upgrade.BillOfMaterials.ReportString;
                 }
-                Rect progressRect = new Rect(innerRect.width / 2-(Text.CalcSize(s).x), 0f, innerRect.width, innerRect.height);
+                Text.Anchor = TextAnchor.MiddleLeft;
+                Rect progressRect = new Rect(innerRect.width / 2-(Text.CalcSize(s).x), 0, innerRect.width, innerRect.height);
                 Widgets.Label(progressRect, s);
             }
             finally
