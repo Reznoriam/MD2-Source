@@ -11,17 +11,33 @@ namespace MD2
     {
         public static IEnumerable<RecipeDef> AllRecipes()
         {
-            foreach(var def in DefDatabase<ManufacturingPlantRecipesDef>.AllDefs)
+            List<RecipeDef> list = new List<RecipeDef>();
+
+            foreach (var def in DefDatabase<ManufacturingPlantRecipesDef>.AllDefs)
             {
-                foreach(var recipe in def.recipes)
+                foreach (var recipe in def.recipes)
                 {
-                    yield return recipe;
+                    list.Add(recipe);
                 }
             }
-            foreach(var def in DefDatabase<RecipeDef>.AllDefs.Where(d => d.defName.Contains("Make_Apparel") || d.defName.Contains("Make_MeleeWeapon") || d.defName.Contains("Make_Bow")))
+            foreach (var def in DefDatabase<RecipeDef>.AllDefs.Where(d => d.workSkill != null && (d.workSkill == SkillDefOf.Crafting || d.workSkill == SkillDefOf.Cooking || d.workSkill == SkillDefOf.Artistic)))
             {
-                yield return def;
+                list.Add(def);
             }
+            foreach (var def in DefDatabase<ManufacturingPlantRecipesDef>.AllDefs)
+            {
+                if (def.blackList != null)
+                {
+                    foreach (var recipe in def.blackList)
+                    {
+                        if (list.Contains(recipe))
+                        {
+                            list.Remove(recipe);
+                        }
+                    }
+                }
+            }
+            return list.AsEnumerable();
         }
     }
 }

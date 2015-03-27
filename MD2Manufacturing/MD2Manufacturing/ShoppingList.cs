@@ -37,7 +37,7 @@ namespace MD2
             foreach(var item in this.foundItems)
             {
                 IEnumerable<Thing> things = (
-                    from t in TradeUtility.AllLaunchableThings
+                    from t in ResourceFinder.AllUsableThings
                     where t.def == item.thing
                     select t).AsEnumerable();
 
@@ -83,7 +83,7 @@ namespace MD2
         private bool SearchForItem(ThingDef def, int amount)
         {
             IEnumerable<Thing> things = (
-                from t in TradeUtility.AllLaunchableThings
+                from t in ResourceFinder.AllUsableThings
                 where t.def == def
                 select t).AsEnumerable();
 

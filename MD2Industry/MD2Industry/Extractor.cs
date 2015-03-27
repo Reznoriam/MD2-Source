@@ -14,6 +14,7 @@ namespace MD2
         public CompPowerTrader power;
         private List<MinerResourceDef> availableList;
         private int resourceIndex = 0;
+        private int tickCount;
 
         public override void SpawnSetup()
         {
@@ -54,6 +55,7 @@ namespace MD2
                         break;
                     }
             }
+            tickCount = availableList[0].ticksToProduce;
         }
 
         public override void ExposeData()
@@ -73,23 +75,15 @@ namespace MD2
             {
                 GenTemperature.PushHeat(this, 1f);
             }
-            if (Rand.Value > 0.3f)
+            if (Find.TickManager.TicksGame % 90 == 0)
             {
                 MoteThrower.ThrowDustPuff(this.TrueCenter(), 0.3f);
             }
             int tick = availableList[resourceIndex].ticksToProduce;
-            if (Game.godMode)
-                tick = 300;
-            if (Find.TickManager.TicksGame % tick == 0)
+            if (tickCount--<=0)
             {
+                tickCount = availableList[resourceIndex].ticksToProduce;
                 Dig();
-                //int num = Rand.Range(1, 100);
-                //if (num < 2)
-                //{
-                //    string ms = "While digging for ores, your extractor has discovered a ruby!";
-                //    Messages.Message(ms, MessageSound.Benefit);
-                //    SpawnRadial.Spawn(MD2Defs.Ruby, 1, this.Position);
-                //}
             }
         }
 
@@ -107,7 +101,6 @@ namespace MD2
     action = () =>
         {
             CycleThroughAvailbleResources();
-            //Log.Message(curSelResource.ToString());
         },
     activateSound = SoundDefOf.Click,
     defaultDesc = "Click to change which resource to produce",
@@ -140,6 +133,7 @@ namespace MD2
                 {
                     resourceIndex = 0;
                 }
+                tickCount = availableList[resourceIndex].ticksToProduce;
             }
         }
 
