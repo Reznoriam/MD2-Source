@@ -49,11 +49,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Building_DeepStorage.cs" />
+    <Compile Include="Building_Incinerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "C:\Users\ACER\Desktop\RimWorld727Win\Mods\MD2Storage\Assemblies"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
